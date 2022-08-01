@@ -62,8 +62,9 @@ if stat_operation == '-e'
       end
     end
   }
-  p output
-
+  puts "Highest: " + output[:highest].to_s + "C on " +  Date::ABBR_MONTHNAMES[output[:h_date].split('-')[1].to_i] + " " + output[:h_date].split('-')[2]
+  puts "Lowest: " + output[:lowest].to_s + "C on " +  Date::ABBR_MONTHNAMES[output[:l_date].split('-')[1].to_i] + " " + output[:l_date].split('-')[2]
+  puts "Huimid: " + output[:humid].to_s + "% on " +  Date::ABBR_MONTHNAMES[output[:date].split('-')[1].to_i] + " " + output[:date].split('-')[2]
 
 elsif stat_operation == '-a'
 # -a for a given month
@@ -77,11 +78,13 @@ elsif stat_operation == '-a'
   file_list.each { |f|
     clean_data = clean_file_data(file_path+f)
     transposed_data = clean_data.transpose
-    output[:highest] = transposed_data[1].map(&:to_i).sum / transposed_data.size
-    output[:lowest] = transposed_data[3].map(&:to_i).sum / transposed_data.size
-    output[:humid] = transposed_data[5].map(&:to_i).sum / transposed_data.size
+    output[:highest] = transposed_data[1].map(&:to_i).sum / transposed_data.count
+    output[:lowest] = transposed_data[3].map(&:to_i).sum / transposed_data.count
+    output[:humid] = transposed_data[5].map(&:to_i).sum / transposed_data.count
   }
-  p output
+  puts "Highest Average: " + output[:highest].to_s + "C"
+  puts "Lowest Average: " + output[:lowest].to_s + "C"
+  puts "Average Huimidity: " + output[:humid].to_s + "%"
 
 
 elsif stat_operation == '-c'
@@ -95,9 +98,20 @@ elsif stat_operation == '-c'
   file_list.select! {|w| w.include?date}
   file_list.each { |f|
     clean_data = clean_file_data(file_path+f)
-    output = clean_data.transpose
+    output = clean_data
   }
-  p output
+  puts date.split('_')[1]+" "+date.split('_')[0]
+  output.each{ |day|
+    print day[0].split('-')[2]
+    day[1].to_i.times { print "+".red }
+    puts day[1].to_s+"C"
+    print day[0].split('-')[2]
+    day[3].to_i.times { print "+".blue }
+    puts day[1].to_s+"C"
+  }
+
+
+
 
 
 else
