@@ -3,7 +3,9 @@
 #   handle input from console
 #   check statistical operation
 #     filter file list base on operation
-#     retive data from filtered list
+#     retrive data from filtered list
+#       retrived data format
+#       "PKT", "Max TemperatureC", "Mean TemperatureC", "Min TemperatureC", "Max Humidity", " Mean Humidity", " Min Humidity"
 #     calculate and find required stats
 #     print result
 
@@ -87,26 +89,17 @@ elsif stat_operation == '-c'
 #   >highest temp per day in red bar.
 #   >lowest temp per day in blue bar.
 #   >Bonus if both bar in the same line.
+  output = []
   date = date.split('/')
   date = date[0]+"_"+ Date::ABBR_MONTHNAMES[date[1].to_i]
   file_list.select! {|w| w.include?date}
   file_list.each { |f|
     clean_data = clean_file_data(file_path+f)
+    output = clean_data.transpose
   }
-  puts "Operational not complete."
+  p output
+
 
 else
   puts "Operational Command not recognized."
 end
-
-# cleaning data to pkt, temp , humidity
-# file = File.open(path, mode)
-# data = CSV.read(path)
-# data = data.transpose[0..-14].transpose
-# data.each do |row|
-#   row.delete_at 4
-#   row.delete_at 5
-#   row.delete_at 6
-#  end
-# p data
-# file.close
