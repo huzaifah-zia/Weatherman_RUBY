@@ -102,18 +102,11 @@ elsif stat_operation == '-c'
   }
   puts date.split('_')[1]+" "+date.split('_')[0]
   output.each{ |day|
-    print day[0].split('-')[2]
-    day[1].to_i.times { print "+".red }
-    puts day[1].to_s+"C"
-    print day[0].split('-')[2]
+    print "#{day[0].split('-')[2]} "
     day[3].to_i.times { print "+".blue }
-    puts day[1].to_s+"C"
+    day[1].to_i.times { print "+".red }
+    puts " " + day[3].to_s + "C - " + day[1].to_s+"C"
   }
-
-
-
-
-
 else
   puts "Operational Command not recognized."
 end
