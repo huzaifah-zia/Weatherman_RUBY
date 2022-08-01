@@ -51,7 +51,7 @@ if stat_operation == '-e'
         output[:h_date] = n[0]
       end
       if n[3].to_i < output[:lowest]
-        output[:lowhest] = n[3].to_i
+        output[:lowest] = n[3].to_i
         output[:l_date] = n[0]
       end
       if n[4].to_i > output[:humid]
@@ -68,13 +68,18 @@ elsif stat_operation == '-a'
 #   >highest avg temp .
 #   >lowest avg temp.
 #   >avg humidity.
+  output = {:highest => 0, :lowest => 100, :humid => 0}
   date = date.split('/')
   date = date[0]+"_"+ Date::ABBR_MONTHNAMES[date[1].to_i]
   file_list.select! {|w| w.include?date}
   file_list.each { |f|
     clean_data = clean_file_data(file_path+f)
+    transposed_data = clean_data.transpose
+    output[:highest] = transposed_data[1].map(&:to_i).sum / transposed_data.size
+    output[:lowest] = transposed_data[3].map(&:to_i).sum / transposed_data.size
+    output[:humid] = transposed_data[5].map(&:to_i).sum / transposed_data.size
   }
-  puts "Operational not complete."
+  p output
 
 
 elsif stat_operation == '-c'
