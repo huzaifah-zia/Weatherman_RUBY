@@ -41,7 +41,7 @@ if stat_operation == '-e'
 #   >lowest temp with date.
 #   >most humid day with date.
 # filter require files
-  output = {:highest => 0, :h_date => "",:lowest => 0, :l_date => "", :humid => 0, :date => ""}
+  output = {:highest => 0, :h_date => "",:lowest => 100, :l_date => "", :humid => 0, :date => ""}
   file_list.select! {|w| w.include?date}
   file_list.each { |f|
     clean_data = clean_file_data(file_path+f)
