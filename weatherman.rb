@@ -15,26 +15,22 @@ require 'csv'
 stat_operation = ARGV[0].to_s
 date = ARGV[1].to_s
 file_path = ARGV[2].to_s
-Mode = "r".freeze
-
-puts stat_operation
-puts date
-puts file_path
 file_list =  Dir.entries(file_path)
+
 
 def clean_file_data(path,mode: 'r')
   file = File.open(path, mode)
   data = CSV.read(path)
 
   data.delete_if {|n| n.join.nil? || n.join.empty? || n.length == 1}
-  data = data.transpose[0..-14].transpose
+  data = data.transpose[0..-14].transpose[1..-1]
   data.each do |row|
     row.delete_at 4
-    row.delete_at 5
-    row.delete_at 6
+    row.delete_at 4
+    row.delete_at 4
    end
-
   file.close
+  return data
 end
 
 
@@ -45,10 +41,26 @@ if stat_operation == '-e'
 #   >lowest temp with date.
 #   >most humid day with date.
 # filter require files
+  output = {:highest => 0, :h_date => "",:lowest => 0, :l_date => "", :humid => 0, :date => ""}
   file_list.select! {|w| w.include?date}
   file_list.each { |f|
-    clean_file_data(file+f)
+    clean_data = clean_file_data(file_path+f)
+    clean_data.each do |n|
+      if n[1].to_i> output[:highest]
+        output[:highest] = n[1].to_i
+        output[:h_date] = n[0]
+      end
+      if n[3].to_i < output[:lowest]
+        output[:lowhest] = n[3].to_i
+        output[:l_date] = n[0]
+      end
+      if n[4].to_i > output[:humid]
+        output[:humid] = n[4].to_i
+        output[:date] = n[0]
+      end
+    end
   }
+  p output
 
 
 elsif stat_operation == '-a'
@@ -60,8 +72,9 @@ elsif stat_operation == '-a'
   date = date[0]+"_"+ Date::ABBR_MONTHNAMES[date[1].to_i]
   file_list.select! {|w| w.include?date}
   file_list.each { |f|
-    clean_file_data(file+f)
+    clean_data = clean_file_data(file_path+f)
   }
+  puts "Operational not complete."
 
 
 elsif stat_operation == '-c'
@@ -72,6 +85,10 @@ elsif stat_operation == '-c'
   date = date.split('/')
   date = date[0]+"_"+ Date::ABBR_MONTHNAMES[date[1].to_i]
   file_list.select! {|w| w.include?date}
+  file_list.each { |f|
+    clean_data = clean_file_data(file_path+f)
+  }
+  puts "Operational not complete."
 
 else
   puts "Operational Command not recognized."
