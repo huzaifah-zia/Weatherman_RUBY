@@ -1,47 +1,66 @@
+
 require 'colorize'
 #list to do
 # handle input from console
 stat_operation = ARGV[0].to_s
 date = ARGV[1].to_s
 file_path = ARGV[2].to_s
+Mode = "r".freeze
 
 puts stat_operation
-puts date
+puts date.split('/')
 puts file_path
 
 # retieve data from file only that is require
 # start with a single file
-path = "/home/dev/Documents/Traning/Ruby Project/Weatherman_RUBY/Murree_weather/Murree_weather_2016_Sep.txt"
-mode = "r"
+file = "/home/dev/Documents/Traning/Ruby Project/Weatherman_RUBY/Murree_weather/"
+file_list =  Dir.entries(file)
 
-p "reading using csv \n\n"
+
+
+# cleaning data to pkt, temp , humidity
 require 'csv'
 file = File.open(path, mode)
 data = CSV.read(path)
+data = data.transpose[0..-14].transpose
+data.each do |row|
+  row.delete_at 4
+  row.delete_at 5
+  row.delete_at 6
+ end
 p data
 file.close
-#   create a class
-#     to retieve only required data
-
-# store data in ruby object
-#     create class
-#     manage data
 
 
-# -e
+
+if stat_operation == '-e'
+# -e for a given year
 #   >highest temp with date.
 #   >lowest temp with date.
 #   >most humid day with date.
+# filter require files
+file_list.select! {|w| w.include?date}
+file_list
 
-# -a
+elsif stat_operation == '-a'
+# -a for a given month
 #   >highest avg temp .
 #   >lowest avg temp.
 #   >avg humidity.
 
-# -c
+elsif stat_operation == '-c'
+  # -c for a given month
 #   >highest temp per day in red bar.
 #   >lowest temp per day in blue bar.
 #   >Bonus if both bar in the same line.
+
+else
+
+end
+
+
+
+
 
 
 
