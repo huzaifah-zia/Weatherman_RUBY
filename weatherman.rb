@@ -13,7 +13,6 @@ file_path = ARGV[2].to_s
 file_list = Dir.entries(file_path)
 
 def clean_file_data(path)
-  file = File.open(path, 'r')
   data = CSV.read(path)
   temp_month = MonthlyWeather.new
   data.delete_if { |n| n.join.nil? || n.join.empty? || n.length == 1 }
@@ -22,7 +21,6 @@ def clean_file_data(path)
     temp_month.add(temp_day)
   end
 
-  file.close
   temp_month
 end
 
