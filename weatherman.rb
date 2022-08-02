@@ -38,9 +38,12 @@ if stat_operation == '-e'
     year.add(month)
 
   }
-  puts "Highest: " + year.yearly_max_temp[0].to_s + "C on " + Date::ABBR_MONTHNAMES[year.yearly_max_temp[1].split('-')[1].to_i] + " " + year.yearly_max_temp[1].split('-')[2]
-  puts "Lowest: " + year.yearly_min_temp[0].to_s + "C on " + Date::ABBR_MONTHNAMES[year.yearly_min_temp[1].split('-')[1].to_i] + " " + year.yearly_min_temp[1].split('-')[2]
-  puts "Huimid: " + year.yearly_max_humidity[0].to_s + "% on " + Date::ABBR_MONTHNAMES[year.yearly_max_humidity[1].split('-')[1].to_i] + " " + year.yearly_max_humidity[1].split('-')[2]
+  format_date = lambda { |date|
+   str  = Date::ABBR_MONTHNAMES[date.split('-')[1].to_i] + " " + date.split('-')[2]
+  }
+  puts "Highest: " + year.yearly_max_temp[0].to_s + "C on " + format_date.call(year.yearly_max_temp[1])
+  puts "Lowest: " + year.yearly_min_temp[0].to_s + "C on " + format_date.call(year.yearly_min_temp[1])
+  puts "Huimid: " + year.yearly_max_humidity[0].to_s + "% on " + format_date.call(year.yearly_max_humidity[1])
 
 
 elsif stat_operation == '-a'
