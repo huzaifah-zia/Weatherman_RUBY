@@ -32,15 +32,15 @@ class Day
 
   def min_temp #return min temperature
     if @keys.include?('Min TemperatureC')
-      return @daily_record['Max TemperatureC'].to_i
+      return @daily_record['Min TemperatureC'].to_i
     else
       return 0
     end
   end
 
   def mean_humidity #return mean humidity
-    if @keys.include?('Mean Humidity')
-      return @daily_record['Mean Humidity'].to_i
+    if @keys.include?(' Mean Humidity')
+      return @daily_record[' Mean Humidity'].to_i
     else
       return 0
     end
@@ -55,8 +55,12 @@ class Day
   end
 
   def pkt #return date
-    if @keys.include?('PKT')
+    if @keys.include?('PKST')
+      return @daily_record['PKST']
+    elsif @keys.include?('PKT')
       return @daily_record['PKT']
+    elsif @keys.include?('GST')
+      return @daily_record['GST']
     else
       return 0
     end
@@ -110,9 +114,9 @@ class Month
   def monthly_max_avg_temp #return avg max temperature of month
     sum_max = 0
     @monthly_record.each { |day|
-      sum_max += day_max_temp
+      sum_max += day.max_temp
     }
-    return sum_max / @count
+    return (sum_max / @count).to_f
   end
 
   def monthly_min_avg_temp #return avg min temperature of month
@@ -120,7 +124,7 @@ class Month
     @monthly_record.each { |day|
       sum_min += day.min_temp
     }
-    return sum_min / @count
+    return (sum_min / @count).to_f
   end
 
   def monthly_mean_avg_humidity #return avg mean humidity of month
@@ -128,11 +132,18 @@ class Month
     @monthly_record.each { |day|
       sum_mean += day.mean_humidity
     }
-    return sum_mean / @count
+
+    return (sum_mean / @count).to_f
   end
 
-  def print_daily_temp
-
+  def print_daily_temp (date)
+    puts date.split('_')[1]+" "+date.split('_')[0]
+    @monthly_record.each{ |day|
+      print "#{day.pkt.split('-')[2]} "
+      day.max_temp.times { print "+".blue }
+      day.min_temp.times { print "+".red }
+      puts " " + day.min_temp.to_s + "C - " + day.max_temp.to_s+"C"
+    }
   end
 end
 
@@ -215,78 +226,48 @@ if stat_operation == '-e'
 #   >lowest temp with date.
 #   >most humid day with date.
 # filter require files
-  output = {:highest => 0, :h_date => "",:lowest => 100, :l_date => "", :humid => 0, :date => ""}
   year = Year.new
   file_list.select! {|w| w.include?date}
   file_list.each { |f|
     month = clean_file_data(file_path+f)
     year.add(month)
 
-    # clean_data.each do |n|
-    #   if n[1].to_i> output[:highest]
-    #     output[:highest] = n[1].to_i
-    #     output[:h_date] = n[0]
-    #   end
-    #   if n[3].to_i < output[:lowest]
-    #     output[:lowest] = n[3].to_i
-    #     output[:l_date] = n[0]
-    #   end
-    #   if n[4].to_i > output[:humid]
-    #     output[:humid] = n[4].to_i
-    #     output[:date] = n[0]
-    #   end
-    # end
-
   }
   puts "Highest: " + year.yearly_max_temp.to_s + "C on "
   puts "Lowest: " + year.yearly_min_temp.to_s + "C on "
   puts "Huimid: " + year.yearly_max_humidity.to_s + "% on "
 
-  # puts "Highest: " + output[:highest].to_s + "C on " +  Date::ABBR_MONTHNAMES[output[:h_date].split('-')[1].to_i] + " " + output[:h_date].split('-')[2]
-  # puts "Lowest: " + output[:lowest].to_s + "C on " +  Date::ABBR_MONTHNAMES[output[:l_date].split('-')[1].to_i] + " " + output[:l_date].split('-')[2]
-  # puts "Huimid: " + output[:humid].to_s + "% on " +  Date::ABBR_MONTHNAMES[output[:date].split('-')[1].to_i] + " " + output[:date].split('-')[2]
 
 elsif stat_operation == '-a'
 # -a for a given month
 #   >highest avg temp .
 #   >lowest avg temp.
 #   >avg humidity.
-  output = {:highest => 0, :lowest => 100, :humid => 0}
+  month = Month.new
   date = date.split('/')
   date = date[0]+"_"+ Date::ABBR_MONTHNAMES[date[1].to_i]
   file_list.select! {|w| w.include?date}
   file_list.each { |f|
-    clean_data = clean_file_data(file_path+f)
-    transposed_data = clean_data.transpose
-    output[:highest] = transposed_data[1].map(&:to_i).sum / transposed_data.count
-    output[:lowest] = transposed_data[3].map(&:to_i).sum / transposed_data.count
-    output[:humid] = transposed_data[5].map(&:to_i).sum / transposed_data.count
+    month = clean_file_data(file_path+f)
   }
-  puts "Highest Average: " + output[:highest].to_s + "C"
-  puts "Lowest Average: " + output[:lowest].to_s + "C"
-  puts "Average Huimidity: " + output[:humid].to_s + "%"
+  puts "Highest Average: " + month.monthly_max_avg_temp.to_s + "C"
+  puts "Lowest Average: " + month.monthly_min_avg_temp.to_s + "C"
+  puts "Average Huimidity: " + month.monthly_mean_avg_humidity.to_s + "%"
 
 
 elsif stat_operation == '-c'
-  # -c for a given month
+# -c for a given month
 #   >highest temp per day in red bar.
 #   >lowest temp per day in blue bar.
 #   >Bonus if both bar in the same line.
-  output = []
+  month = Month.new
   date = date.split('/')
   date = date[0]+"_"+ Date::ABBR_MONTHNAMES[date[1].to_i]
   file_list.select! {|w| w.include?date}
   file_list.each { |f|
-    clean_data = clean_file_data(file_path+f)
-    output = clean_data
+    month = clean_file_data(file_path+f)
   }
-  puts date.split('_')[1]+" "+date.split('_')[0]
-  output.each{ |day|
-    print "#{day[0].split('-')[2]} "
-    day[3].to_i.times { print "+".blue }
-    day[1].to_i.times { print "+".red }
-    puts " " + day[3].to_s + "C - " + day[1].to_s+"C"
-  }
+  month.print_daily_temp(date)
 else
   puts "Operational Command not recognized."
 end
