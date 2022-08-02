@@ -28,7 +28,7 @@ def clean_file_data(path,mode: 'r')
   return temp_month
 end
 
-def monthly_data(date, file_list, file_path)
+def get_monthly_data(date, file_list, file_path)
   month = Monthly_Weather.new
   date = date.split('/')
   date = date[0]+"_"+ Date::ABBR_MONTHNAMES[date[1].to_i]
@@ -39,7 +39,7 @@ def monthly_data(date, file_list, file_path)
   return month
 end
 
-def yearly_data(date,file_list, file_path)
+def get_yearly_data(date,file_list, file_path)
   year = Yearly_weather.new
   file_list.select! {|w| w.include?date}
   file_list.each { |f|
