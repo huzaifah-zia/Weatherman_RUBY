@@ -1,9 +1,9 @@
 require 'colorize'
 require 'date'
 require 'csv'
-require './recordClass.rb'
-require './fileClass.rb'
-require './folderClass.rb'
+require './record.rb'
+require './file.rb'
+require './folder.rb'
 
 stat_operation = ARGV[0].to_s
 date = ARGV[1].to_s

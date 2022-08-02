@@ -1,6 +1,4 @@
 class Folder
-  @yearly_record
-  @count
   def initialize
     @yearly_record = []
     @count = 0

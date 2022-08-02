@@ -1,6 +1,4 @@
 class File_record
-  @monthly_record
-  @count
   def initialize
     @monthly_record = []
     @count = 0
