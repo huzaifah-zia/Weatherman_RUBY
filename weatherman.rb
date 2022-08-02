@@ -24,7 +24,7 @@ class Day
 
   def max_temp #return max temperature
     if @keys.include?('Max TemperatureC')
-      return @daily_record['Max TemperatureC'].to_i
+      return [@daily_record['Max TemperatureC'].to_i,self.pkt]
     else
       return 0
     end
@@ -32,7 +32,7 @@ class Day
 
   def min_temp #return min temperature
     if @keys.include?('Min TemperatureC')
-      return @daily_record['Min TemperatureC'].to_i
+      return [@daily_record['Min TemperatureC'].to_i,self.pkt]
     else
       return 0
     end
@@ -48,7 +48,7 @@ class Day
 
   def max_humidity #return max humidity
     if @keys.include?('Max Humidity')
-      return @daily_record['Max Humidity'].to_i
+      return [@daily_record['Max Humidity'].to_i,self.pkt]
     else
       return 0
     end
@@ -82,39 +82,45 @@ class Month
   end
 
   def monthly_max_temp #return highest max temperature of month
-    max = @monthly_record.first.max_temp
+    max = @monthly_record.first.max_temp[0]
+    date = @monthly_record.first.max_temp[1]
     @monthly_record.each { |day|
-      if max < day.max_temp
-        max = day.max_temp
+      if max < day.max_temp[0]
+        max = day.max_temp[0]
+        date = day.max_temp[1]
       end
     }
-    return max
+    return [max, date]
   end
 
   def monthly_min_temp #return lowst min temperature of month
-    min = @monthly_record.first.min_temp
+    min = @monthly_record.first.min_temp[0]
+    date = @monthly_record.first.min_temp[1]
     @monthly_record.each { |day|
-      if min > day.min_temp
-        min = day.min_temp
+      if min > day.min_temp[0]
+        min = day.min_temp[0]
+        date = day.min_temp[1]
       end
     }
-    return min
+    return [min, date]
   end
 
   def monthly_max_humidity #return highest max humidity of month
-    max = @monthly_record.first.max_humidity
+    max = @monthly_record.first.max_humidity[0]
+    date = @monthly_record.first.max_humidity[1]
     @monthly_record.each { |day|
-      if max < day.max_humidity
-        max = day.max_humidity
+      if max < day.max_humidity[0]
+        max = day.max_humidity[0]
+        date = day.max_humidity[1]
       end
     }
-    return max
+    return [max, date]
   end
 
   def monthly_max_avg_temp #return avg max temperature of month
     sum_max = 0
     @monthly_record.each { |day|
-      sum_max += day.max_temp
+      sum_max += day.max_temp[0]
     }
     return (sum_max / @count).to_f
   end
@@ -122,7 +128,7 @@ class Month
   def monthly_min_avg_temp #return avg min temperature of month
     sum_min = 0
     @monthly_record.each { |day|
-      sum_min += day.min_temp
+      sum_min += day.min_temp[0]
     }
     return (sum_min / @count).to_f
   end
@@ -140,9 +146,9 @@ class Month
     puts date.split('_')[1]+" "+date.split('_')[0]
     @monthly_record.each{ |day|
       print "#{day.pkt.split('-')[2]} "
-      day.max_temp.times { print "+".blue }
-      day.min_temp.times { print "+".red }
-      puts " " + day.min_temp.to_s + "C - " + day.max_temp.to_s+"C"
+      day.max_temp[0].times { print "+".blue }
+      day.min_temp[0].times { print "+".red }
+      puts " " + day.min_temp[0].to_s + "C - " + day.max_temp[0].to_s+"C"
     }
   end
 end
@@ -162,33 +168,39 @@ class Year
   end
 
   def yearly_max_temp
-    max = @yearly_record.first.monthly_max_temp
+    max = @yearly_record.first.monthly_max_temp[0]
+    date = @yearly_record.first.monthly_max_temp[1]
     @yearly_record.each { |month|
-      if max < month.monthly_max_temp
-        max = month.monthly_max_temp
+      if max < month.monthly_max_temp[0]
+        max = month.monthly_max_temp[0]
+        date = month.monthly_max_temp[1]
       end
     }
-    return max
+    return [max, date]
   end
 
   def yearly_min_temp
-    min = @yearly_record.first.monthly_min_temp
+    min = @yearly_record.first.monthly_min_temp[0]
+    date = @yearly_record.first.monthly_min_temp[1]
     @yearly_record.each { |month|
-      if min < month.monthly_min_temp
-        min = month.monthly_min_temp
+      if min < month.monthly_min_temp[0]
+        min = month.monthly_min_temp[0]
+        date = month.monthly_min_temp[1]
       end
     }
-    return min
+    return [min, date]
   end
 
   def yearly_max_humidity
-    max = @yearly_record.first.monthly_max_humidity
+    max = @yearly_record.first.monthly_max_humidity[0]
+    date = @yearly_record.first.monthly_max_humidity[1]
     @yearly_record.each { |month|
-      if max < month.monthly_max_humidity
-        max = month.monthly_max_humidity
+      if max < month.monthly_max_humidity[0]
+        max = month.monthly_max_humidity[0]
+        date = month.monthly_max_humidity[1]
       end
     }
-    return max
+    return [max, date]
   end
 
 
@@ -233,9 +245,9 @@ if stat_operation == '-e'
     year.add(month)
 
   }
-  puts "Highest: " + year.yearly_max_temp.to_s + "C on "
-  puts "Lowest: " + year.yearly_min_temp.to_s + "C on "
-  puts "Huimid: " + year.yearly_max_humidity.to_s + "% on "
+  puts "Highest: " + year.yearly_max_temp[0].to_s + "C on " + Date::ABBR_MONTHNAMES[year.yearly_max_temp[1].split('-')[1].to_i] + " " + year.yearly_max_temp[1].split('-')[2]
+  puts "Lowest: " + year.yearly_min_temp[0].to_s + "C on " + Date::ABBR_MONTHNAMES[year.yearly_min_temp[1].split('-')[1].to_i] + " " + year.yearly_min_temp[1].split('-')[2]
+  puts "Huimid: " + year.yearly_max_humidity[0].to_s + "% on " + Date::ABBR_MONTHNAMES[year.yearly_max_humidity[1].split('-')[1].to_i] + " " + year.yearly_max_humidity[1].split('-')[2]
 
 
 elsif stat_operation == '-a'
