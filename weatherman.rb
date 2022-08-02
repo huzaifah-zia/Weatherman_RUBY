@@ -12,7 +12,177 @@
 require 'colorize'
 require 'date'
 require 'csv'
-#list to do
+#classes
+#Day Class contains daily record
+class Day
+  @daily_record
+  @keys
+  def initialize(record)
+    @daily_record = record
+    @keys = @daily_record.keys
+  end
+
+  def max_temp #return max temperature
+    if @keys.include?('Max TemperatureC')
+      return @daily_record['Max TemperatureC'].to_i
+    else
+      return 0
+    end
+  end
+
+  def min_temp #return min temperature
+    if @keys.include?('Min TemperatureC')
+      return @daily_record['Max TemperatureC'].to_i
+    else
+      return 0
+    end
+  end
+
+  def mean_humidity #return mean humidity
+    if @keys.include?('Mean Humidity')
+      return @daily_record['Mean Humidity'].to_i
+    else
+      return 0
+    end
+  end
+
+  def max_humidity #return max humidity
+    if @keys.include?('Max Humidity')
+      return @daily_record['Max Humidity'].to_i
+    else
+      return 0
+    end
+  end
+
+  def pkt #return date
+    if @keys.include?('PKT')
+      return @daily_record['PKT']
+    else
+      return 0
+    end
+  end
+end
+
+#Month Class contains array of day class
+class Month
+  @monthly_record
+  @count #days_in_month
+  def initialize
+    @monthly_record = []
+    @count = 0
+  end
+
+  def add(record)
+    @monthly_record << record
+    @count += 1
+  end
+
+  def monthly_max_temp #return highest max temperature of month
+    max = @monthly_record.first.max_temp
+    @monthly_record.each { |day|
+      if max < day.max_temp
+        max = day.max_temp
+      end
+    }
+    return max
+  end
+
+  def monthly_min_temp #return lowst min temperature of month
+    min = @monthly_record.first.min_temp
+    @monthly_record.each { |day|
+      if min > day.min_temp
+        min = day.min_temp
+      end
+    }
+    return min
+  end
+
+  def monthly_max_humidity #return highest max humidity of month
+    max = @monthly_record.first.max_humidity
+    @monthly_record.each { |day|
+      if max < day.max_humidity
+        max = day.max_humidity
+      end
+    }
+    return max
+  end
+
+  def monthly_max_avg_temp #return avg max temperature of month
+    sum_max = 0
+    @monthly_record.each { |day|
+      sum_max += day_max_temp
+    }
+    return sum_max / @count
+  end
+
+  def monthly_min_avg_temp #return avg min temperature of month
+    sum_min = 0
+    @monthly_record.each { |day|
+      sum_min += day.min_temp
+    }
+    return sum_min / @count
+  end
+
+  def monthly_mean_avg_humidity #return avg mean humidity of month
+    sum_mean = 0
+    @monthly_record.each { |day|
+      sum_mean += day.mean_humidity
+    }
+    return sum_mean / @count
+  end
+
+  def print_daily_temp
+
+  end
+end
+
+#Year Class contains array of month class
+class Year
+  @yearly_record
+  @count #months_in_year
+  def initialize
+    @yearly_record = []
+    @count = 0
+  end
+
+  def add(record)
+    @yearly_record << record
+    @count += 1
+  end
+
+  def yearly_max_temp
+    max = @yearly_record.first.monthly_max_temp
+    @yearly_record.each { |month|
+      if max < month.monthly_max_temp
+        max = month.monthly_max_temp
+      end
+    }
+    return max
+  end
+
+  def yearly_min_temp
+    min = @yearly_record.first.monthly_min_temp
+    @yearly_record.each { |month|
+      if min < month.monthly_min_temp
+        min = month.monthly_min_temp
+      end
+    }
+    return min
+  end
+
+  def yearly_max_humidity
+    max = @yearly_record.first.monthly_max_humidity
+    @yearly_record.each { |month|
+      if max < month.monthly_max_humidity
+        max = month.monthly_max_humidity
+      end
+    }
+    return max
+  end
+
+
+end
+
 # handle input from console
 stat_operation = ARGV[0].to_s
 date = ARGV[1].to_s
@@ -23,16 +193,18 @@ file_list =  Dir.entries(file_path)
 def clean_file_data(path,mode: 'r')
   file = File.open(path, mode)
   data = CSV.read(path)
-
+  temp_month = Month.new
   data.delete_if {|n| n.join.nil? || n.join.empty? || n.length == 1}
-  data = data.transpose[0..-14].transpose[1..-1]
-  data.each do |row|
-    row.delete_at 4
-    row.delete_at 4
-    row.delete_at 4
-   end
+
+  keys = data.first
+
+  data.drop(1).each do |row|
+    temp_day = Day.new(keys.zip(row).to_h) # converting each hash
+    temp_month.add(temp_day)
+  end
+
   file.close
-  return data
+  return temp_month
 end
 
 
@@ -44,27 +216,35 @@ if stat_operation == '-e'
 #   >most humid day with date.
 # filter require files
   output = {:highest => 0, :h_date => "",:lowest => 100, :l_date => "", :humid => 0, :date => ""}
+  year = Year.new
   file_list.select! {|w| w.include?date}
   file_list.each { |f|
-    clean_data = clean_file_data(file_path+f)
-    clean_data.each do |n|
-      if n[1].to_i> output[:highest]
-        output[:highest] = n[1].to_i
-        output[:h_date] = n[0]
-      end
-      if n[3].to_i < output[:lowest]
-        output[:lowest] = n[3].to_i
-        output[:l_date] = n[0]
-      end
-      if n[4].to_i > output[:humid]
-        output[:humid] = n[4].to_i
-        output[:date] = n[0]
-      end
-    end
+    month = clean_file_data(file_path+f)
+    year.add(month)
+
+    # clean_data.each do |n|
+    #   if n[1].to_i> output[:highest]
+    #     output[:highest] = n[1].to_i
+    #     output[:h_date] = n[0]
+    #   end
+    #   if n[3].to_i < output[:lowest]
+    #     output[:lowest] = n[3].to_i
+    #     output[:l_date] = n[0]
+    #   end
+    #   if n[4].to_i > output[:humid]
+    #     output[:humid] = n[4].to_i
+    #     output[:date] = n[0]
+    #   end
+    # end
+
   }
-  puts "Highest: " + output[:highest].to_s + "C on " +  Date::ABBR_MONTHNAMES[output[:h_date].split('-')[1].to_i] + " " + output[:h_date].split('-')[2]
-  puts "Lowest: " + output[:lowest].to_s + "C on " +  Date::ABBR_MONTHNAMES[output[:l_date].split('-')[1].to_i] + " " + output[:l_date].split('-')[2]
-  puts "Huimid: " + output[:humid].to_s + "% on " +  Date::ABBR_MONTHNAMES[output[:date].split('-')[1].to_i] + " " + output[:date].split('-')[2]
+  puts "Highest: " + year.yearly_max_temp.to_s + "C on "
+  puts "Lowest: " + year.yearly_min_temp.to_s + "C on "
+  puts "Huimid: " + year.yearly_max_humidity.to_s + "% on "
+
+  # puts "Highest: " + output[:highest].to_s + "C on " +  Date::ABBR_MONTHNAMES[output[:h_date].split('-')[1].to_i] + " " + output[:h_date].split('-')[2]
+  # puts "Lowest: " + output[:lowest].to_s + "C on " +  Date::ABBR_MONTHNAMES[output[:l_date].split('-')[1].to_i] + " " + output[:l_date].split('-')[2]
+  # puts "Huimid: " + output[:humid].to_s + "% on " +  Date::ABBR_MONTHNAMES[output[:date].split('-')[1].to_i] + " " + output[:date].split('-')[2]
 
 elsif stat_operation == '-a'
 # -a for a given month
