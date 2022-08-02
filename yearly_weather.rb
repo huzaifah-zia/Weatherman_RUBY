@@ -1,4 +1,4 @@
-class Folder
+class Yearly_weather
   def initialize
     @yearly_record = []
     @count = 0

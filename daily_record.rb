@@ -1,4 +1,4 @@
-class Record
+class Daily_record
   def initialize(record)
     @daily_record = record
     @keys = @daily_record.keys

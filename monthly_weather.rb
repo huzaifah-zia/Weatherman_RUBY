@@ -1,4 +1,4 @@
-class File_record
+class Monthly_Weather
   def initialize
     @monthly_record = []
     @count = 0
