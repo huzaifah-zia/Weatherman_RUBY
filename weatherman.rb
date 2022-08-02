@@ -12,39 +12,7 @@ class Weatherman
     @path = ARGV[2].to_s
     @operation = ARGV[0].to_s
     @date = ARGV[1].to_s
-    @file_list = Dir.entries(@path)
-  end
-
-  def clean_file_data(new_path)
-    data = CSV.read(new_path)
-    temp_month = MonthlyWeather.new
-    data.delete_if { |n| n.join.nil? || n.join.empty? || n.length == 1 }
-    data.drop(1).each do |row|
-      temp_day = DailyRecord.new(data.first.zip(row).to_h) # converting each hash
-      temp_month.add(temp_day)
-    end
-    temp_month
-  end
-
-  def monthly_data
-    month = MonthlyWeather.new
-    date = @date.split('/')
-    date = "#{date[0]}_#{Date::ABBR_MONTHNAMES[date[1].to_i]}"
-    @file_list.select! { |w| w.include? date }
-    @file_list.each do |f|
-      month = clean_file_data(@path + f)
-    end
-    month
-  end
-
-  def yearly_data
-    year = YearlyWeather.new
-    @file_list.select! { |w| w.include? @date }
-    @file_list.each do |f|
-      month = clean_file_data(@path + f)
-      year.add(month)
-    end
-    year
+    @months = Date::ABBR_MONTHNAMES.compact
   end
 
   def exceute
@@ -56,18 +24,45 @@ class Weatherman
       puts "Huimid: #{year.yearly_max_humidity[0]}% on #{yield(year.yearly_max_humidity[1])}"
 
     when '-a'
-      month = monthly_data
+      month = monthly_data "#{@path}#{@path.split('/').last}_#{@date.split('/').first}_#{@months[@date.split('/')[1].to_i]}.txt"
       puts "Highest Average: #{month.monthly_max_avg_temp}C"
       puts "Lowest Average: #{month.monthly_min_avg_temp}C"
       puts "Average Huimidity: #{month.monthly_mean_avg_humidity}%"
 
     when '-c'
-      month = monthly_data
+      month = monthly_data "#{@path}#{@path.split('/').last}_#{@date.split('/').first}_#{@months[@date.split('/')[1].to_i]}.txt"
       month.print_daily_temp(@date)
 
     else
       puts 'Operational Command not recognized.'
     end
+  end
+
+private
+  def monthly_data(new_path)
+    if(File.exists?(new_path))
+      data = CSV.read(new_path)
+      temp_month = MonthlyWeather.new
+      data.delete_if { |n| n.join.nil? || n.join.empty? || n.length == 1 }
+      data.drop(1).each do |row|
+        temp_day = DailyRecord.new(data.first.zip(row).to_h) # converting each hash
+        temp_month.add(temp_day)
+      end
+      temp_month
+    else
+      puts "File doesn't exist."
+    end
+  end
+
+
+  def yearly_data
+    data = YearlyWeather.new
+    year = @date.split('/').first
+    file_name = "#{@path}#{@path.split('/').last}_#{year}"
+    @months.each do |month|
+      data.add(monthly_data("#{file_name}_#{month}.txt"))
+    end
+    data
   end
 end
 

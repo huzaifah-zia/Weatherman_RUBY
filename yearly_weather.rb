@@ -3,12 +3,10 @@
 class YearlyWeather
   def initialize
     @yearly_record = []
-    @count = 0
   end
 
   def add(record)
     @yearly_record << record
-    @count += 1
   end
 
   def yearly_max_temp
