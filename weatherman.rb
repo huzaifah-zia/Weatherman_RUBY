@@ -28,10 +28,7 @@ def clean_file_data(path,mode: 'r')
   return temp_month
 end
 
-format_date = lambda { |date|
-  str  = Date::ABBR_MONTHNAMES[date.split('-')[1].to_i] + " " + date.split('-')[2]
- }
-monthly_data = lambda { |date, file_list|
+def monthly_data(date, file_list, file_path)
   month = Monthly_Weather.new
   date = date.split('/')
   date = date[0]+"_"+ Date::ABBR_MONTHNAMES[date[1].to_i]
@@ -40,32 +37,38 @@ monthly_data = lambda { |date, file_list|
     month = clean_file_data(file_path+f)
   }
   return month
- }
+end
 
-if stat_operation == '-e'
+def yearly_data(date,file_list, file_path)
   year = Yearly_weather.new
   file_list.select! {|w| w.include?date}
   file_list.each { |f|
     month = clean_file_data(file_path+f)
     year.add(month)
-
   }
+  return year
+end
 
-  puts "Highest: " + year.yearly_max_temp[0].to_s + "C on " + format_date.call(year.yearly_max_temp[1])
-  puts "Lowest: " + year.yearly_min_temp[0].to_s + "C on " + format_date.call(year.yearly_min_temp[1])
-  puts "Huimid: " + year.yearly_max_humidity[0].to_s + "% on " + format_date.call(year.yearly_max_humidity[1])
+format_date = lambda { |date|
+  str  = Date::ABBR_MONTHNAMES[date.split('-')[1].to_i] + " " + date.split('-')[2]
+ }
 
+if stat_operation == '-e'
+  year = yearly_data(date, file_list, file_path)
+  puts "Highest: #{year.yearly_max_temp[0].to_s}C on #{format_date.call(year.yearly_max_temp[1])}"
+  puts "Lowest: #{year.yearly_min_temp[0].to_s}C on #{format_date.call(year.yearly_min_temp[1])}"
+  puts "Huimid: #{year.yearly_max_humidity[0].to_s}% on #{format_date.call(year.yearly_max_humidity[1])}"
 
 elsif stat_operation == '-a'
-  month = monthly_data.call(date,file_list)
+  month = monthly_data(date,file_list, file_path)
   puts "Highest Average: " + month.monthly_max_avg_temp.to_s + "C"
   puts "Lowest Average: " + month.monthly_min_avg_temp.to_s + "C"
   puts "Average Huimidity: " + month.monthly_mean_avg_humidity.to_s + "%"
 
-
 elsif stat_operation == '-c'
-  month = monthly_data.call(date,file_list)
+  month = monthly_data(date,file_list, file_path)
   month.print_daily_temp(date)
+
 else
   puts "Operational Command not recognized."
 end

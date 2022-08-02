@@ -1,3 +1,4 @@
+require 'date'
 class Monthly_Weather
   def initialize
     @monthly_record = []
@@ -71,7 +72,7 @@ class Monthly_Weather
   end
 
   def print_daily_temp (date)
-    puts date.split('_')[1]+" "+date.split('_')[0]
+    puts "#{Date::ABBR_MONTHNAMES[date.split('/')[1].to_i]} #{date.split('/')[0]}"
     @monthly_record.each{ |day|
       print "#{day.pkt.split('-')[2]} "
       day.max_temp[0].times { print "+".blue }
