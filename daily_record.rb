@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Daily weather record class
 class DailyRecord
   def initialize(record)
     @daily_record = record

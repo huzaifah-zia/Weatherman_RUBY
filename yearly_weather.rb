@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# yearly weather record class
 class YearlyWeather
   def initialize
     @yearly_record = []

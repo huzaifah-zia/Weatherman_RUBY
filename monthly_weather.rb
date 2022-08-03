@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'date'
+
+# Monthly weather record class
 class MonthlyWeather
   def initialize
     @monthly_record = []
